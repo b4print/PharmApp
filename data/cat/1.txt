@@ -1,0 +1,5 @@
+Anthelmintisk@101
+Hud@102
+Mun@103
+NSAID@104
+Sedering@105

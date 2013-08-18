@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Pharmaxim Animal Health</title>
+	<link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.3.0.css">
+	<script src="js/jquery.js"></script>
+	<style type="text/css">
+	a
+	{
+	    color:White;
+	    font-weight:bolder;
+	}
+	</style>
+	<script src="js/jquery.mobile-1.3.0.js"></script>
+    <script type="text/javascript">
+        $(document).on("pagebeforeshow", "#CurrentPage", function (e) {
+            ini();
+            ShowTopicInfo();//show topic content
+        });
+        $(document).bind("mobileinit", function () {
+            $.mobile.ajaxLinksEnabled = false;
+            ini();
+
+        });
+        //increasing performance
+        function ini() {
+            $.mobile.defaultPageTransition = 'none';
+            $.mobile.defaultDialogTransition = 'none';
+            $.mobile.useFastClick = true;
+            $.mobile.buttonMarkup.hoverDelay = 0;
+        }
+        var CurrentIndex = -1;
+        function ShowTopicInfo() {
+            try {
+                var id = getParameterByName("id");//get topic id from url
+                CurrentIndex = id;
+                CheckTopic(id);//checking topic if exists into favorites list.. if yes make 'Make Favorite' button as selected
+                var url = "data/topics/" + id + ".txt";
+                //ajax call to load topic content
+                $.ajax({
+                    url: url,
+                    dataType: "text",
+
+                    type: "GET",
+                    async: true,
+
+                    success: function (data) {
+                        var da = data.split('@');
+                        var title = da[0];
+                        var called = da[1];
+                        var content = da[2];
+                        var related = da[3];
+                        $("#title").html(title);
+                        $("#called").html(called);
+                        $("#cont").html(content);
+                        if (related != "") {
+
+                            var rels = related.split('^');
+                            LoadRelated(rels);//load realated topics list
+                        }
+                    }
+                });
+            } catch (err) {
+
+            }
+    }
+    function CheckTopic(id) {
+        if (localStorage["bawnappsmedinfofavmed"] != null) {
+            var indxs = localStorage["bawnappsmedinfofavmed"].split('-');
+            if (indxs.indexOf(id) != -1) {
+                $("#btnSave").addClass("ui-btn-active");
+            }
+        }
+    }
+        function LoadRelated(rels) {
+            $.ajax({
+                url: "data/titles/alltitles.txt",
+                dataType: "text",
+                type: "GET",
+                async: true,
+                success: function (data) {
+                    var da = data.split('\n');
+                    $("#related").append("<b>Related Topics :</b><br>");
+                    var oput = "<ul>";
+                    for (var rel in rels) {
+                        var li = "<li><a data-transition='none' data-ajax='false' style='color:black;' href='topicinfo.html?id=" + rels[rel] + "'>" +da[rels[rel]-1] + "</a></li>";
+                        oput += li;
+                    }
+                    oput += "</ul>";
+                    $("#related").append(oput);//adding items to related list
+                }
+            });
+
+        }
+        //get parameters from url
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+            var regexS = "[\\?&]" + name + "=([^&#]*)";
+            var regex = new RegExp(regexS);
+            var results = regex.exec(window.location.search);
+            if (results == null)
+                return "";
+            else
+                return decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+        //adding topic to favorites list
+        $(document).on("click", "#btnSave", function (event) {
+            try {
+                if (localStorage["bawnappsmedinfofavmed"] == null) {
+                    localStorage["bawnappsmedinfofavmed"] = CurrentIndex;
+                } else {
+                    var indxs = localStorage["bawnappsmedinfofavmed"].split('-');
+                    if (indxs.indexOf(CurrentIndex) != -1) {
+                    
+                    } else {
+                        localStorage["bawnappsmedinfofavmed"] = localStorage["bawnappsmedinfofavmed"] + "-" + CurrentIndex;
+         
+                    }
+                }
+            } catch (err) {
+               // alert(err.message);
+            }
+        });
+    </script>
+</head>
+<body onload="ini();">
+<div data-role="page" data-theme="c" data-name="ahmad alrosan" id="CurrentPage" class="my-page">
+
+	<div data-role="header" data-theme="c" data-position="fixed" data-tap-toggle="false">
+		<h1 style="font-weight:bold;">Läkemedel</h1>
+		<a  data-transition="none" data-shadow="false" data-iconshadow="false" data-icon="back" data-rel="back"   data-ajax="false">Tillbaka</a>
+	<a data-transition="none" data-shadow="false" data-iconshadow="false" data-icon="search" href="search.html"  data-ajax="false">Sök</a>
+
+
+    </div>
+	
+	<div  data-role="content">
+	
+     <div  style="text-align:center; font-size:x-large; font-weight:bold; border-bottom-style:groove;" id="title">
+     </div><br />
+     <div style="text-align:center; font-size:medium;" id="called">
+     </div>
+                <p style="text-align:left; font-size:medium; border-style:outset; border:1;" id="cont">
+                
+                </p>
+                <div id="related"  style="text-align:left; color:Black; font-size:medium">
+                <style type="text/css">
+                a
+                {
+                    color:Black;
+                }
+                </style>
+                </div>
+    </div>
+    <div data-role="footer" data-tap-toggle="false" data-position="fixed"  data-theme="c">
+
+		<div data-role="navbar">
+			<ul>
+				<li><a data-transition="none" href="search.html" data-ajax="false"  data-icon="search">Sök</a></li>
+                
+				<li><a data-transition="none" id="btnSave"  data-ajax="false" data-icon="star">Favorit</a></li>
+
+			</ul>
+		</div>
+	</div>
+
+	
+ 
+
+</div>
+
+</body>
+</html>

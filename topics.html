@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Medical Information and News</title>
+	<link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.3.0.css">
+
+
+	<script src="js/jquery.js"></script>
+	
+	<script src="js/jquery.mobile-1.3.0.js"></script>
+    <script type="text/javascript">
+        $(document).on("pagebeforeshow", "#CurrentPage", function (e) {
+            ini();
+            LoadTopicsList();//loading topics list
+        });
+        $(document).bind("mobileinit", function () {
+            $.mobile.ajaxLinksEnabled = false;
+            ini();
+
+        });
+        //increasing performance
+        function ini() {
+            $.mobile.defaultPageTransition = 'none';
+            $.mobile.defaultDialogTransition = 'none';
+            $.mobile.useFastClick = true;
+            $.mobile.buttonMarkup.hoverDelay = 0;
+        }
+        function LoadTopicsList() {
+            try {
+                var id = getParameterByName("id");//get sub categories id
+                var url = "data/titles/" + id + ".txt";
+                //ajax call to load topics titles
+                $.ajax({
+                    url: url,
+                    dataType: "text",
+
+                    type: "GET",
+                    async: true,
+
+                    success: function (data) {
+                        var topics = data.split('\n');
+                        var oput = "";
+                        for (var c = 0; c < topics.length; c++) {
+                            var topic = topics[c];
+                            if (topic == "") {
+                                continue;
+                            }
+         
+                            var li = "<li><a data-transition='none'  data-ajax='false' class='topic' href='topicinfo.html?id=" + topic.split('@')[1] + "'>" + topic.split('@')[0] + "</a></li>";
+                            oput += li;
+                        }
+                        $("#lstTopics").append(oput);//adding items to topics listview
+                        $("#lstTopics").listview("refresh");//rendering listview
+
+                    }
+                });
+            } catch (err) {
+           // alert(err.message);
+            }
+        }
+       //get parameters values from url
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+            var regexS = "[\\?&]" + name + "=([^&#]*)";
+            var regex = new RegExp(regexS);
+            var results = regex.exec(window.location.search);
+            if (results == null)
+                return "";
+            else
+                return decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+      
+
+    </script>
+</head>
+<body onload="ini();">
+<div data-role="page" data-theme="c" id="CurrentPage" class="my-page">
+
+	<div data-role="header" data-position="fixed" data-theme="c" data-tap-toggle="false">
+		<h1 style="font-weight:bold;">Läkemedel</h1>
+	<a data-transition="none"  data-shadow="false" data-iconshadow="false" data-icon="back" data-rel="back"   data-ajax="false">Tillbaka</a>
+	<a data-transition="none" data-shadow="false" data-iconshadow="false" data-icon="search" href="search.html"  data-ajax="false">Sök</a>
+    </div>
+	
+	<div data-role="content">
+	
+        <ul data-role="listview" id="lstTopics" data-filter="true" data-filter-theme="c" data-inset="true">
+       	   
+        </ul>
+                
+    </div>
+    
+ 
+
+</div>
+
+</body>
+</html>
